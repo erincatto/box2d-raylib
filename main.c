@@ -45,13 +45,13 @@ void DrawEntity(const Entity* entity, Conversion cv)
 
 int main(void)
 {
-    int width = 1920, height = 1080;
+    int width = 1280, height = 720;
     InitWindow(width, height, "box2d-raylib");
 
     SetTargetFPS(60);
 
     float tileSize = 1.0f;
-    float scale = 60.0f;
+    float scale = 50.0f;
 
     Conversion cv = {scale, tileSize, (float)width, (float)height};
 
@@ -110,7 +110,11 @@ int main(void)
 
         BeginDrawing();
         ClearBackground(DARKGRAY);
-        DrawText("Hello Box2D!", width / 2 - 40, 50, 36, LIGHTGRAY);
+
+        const char* message = "Hello Box2D!";
+        int fontSize = 36;
+        int textWidth = MeasureText("Hello Box2D!", fontSize);  
+        DrawText(message, (width - textWidth) / 2, 50, fontSize, LIGHTGRAY);
 
         for (int i = 0; i < 20; ++i)
         {

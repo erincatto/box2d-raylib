@@ -8,3 +8,5 @@ I use CMake and FetchContent to bring together box2d and raylib with no submodul
 The demo shows how to setup a simulation coordinate system and transform the results to the screen. I also left some notes showing how I verified the transformation.
 
 Feel free to use this project as a starting point for making a game using raylib and Box2D.
+
+![screenshot](screenshot.png)
