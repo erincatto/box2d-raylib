@@ -4,100 +4,129 @@
 typedef struct Conversion
 {
     float scale;
-    float halfWidth;
-    float halfHeight;
+    float tileSize;
+    float screenWidth;
+    float screenHeight;
 } Conversion;
 
 typedef struct Entity
 {
     b2BodyId bodyId;
-    int width;
-    int height;
+    Texture texture;
 } Entity;
 
-Vector2 ConvertPositionToRayLib(b2Vec2 p, Conversion cv)
+Vector2 ConvertWorldToScreen(b2Vec2 p, Conversion cv)
 {
-    Vector2 result = {cv.scale * p.x + cv.halfWidth, cv.halfHeight - cv.scale * p.y};
+    Vector2 result = {cv.scale * p.x + 0.5f * cv.screenWidth, 0.5f * cv.screenHeight - cv.scale * p.y};
     return result;
 }
 
-b2Vec2 ConvertPositionToBox2D(Vector2 p, Conversion cv)
+void DrawEntity(const Entity* entity, Conversion cv)
 {
-    b2Vec2 result = {(p.x - cv.halfWidth) / cv.scale, (cv.halfHeight - p.y) / cv.scale};
-    return result;
-}
-
-b2Polygon RectangleToPolygon(int width, int height, float scale)
-{
-    return b2MakeBox(0.5f * width / scale, 0.5f * height / scale);
-}
-
-void DrawEntity(const Entity* entity, Conversion cv, Color color)
-{
-    b2Vec2 p = b2Body_GetPosition(entity->bodyId);
+    b2Vec2 p = b2Body_GetWorldPoint(entity->bodyId, (b2Vec2){-0.5f * cv.tileSize, 0.5f * cv.tileSize});
     float radians = b2Body_GetAngle(entity->bodyId);
 
-    Vector2 ps = ConvertPositionToRayLib(p, cv);
-    Rectangle rec = {ps.x, ps.y, entity->width, entity->height};
+    Vector2 ps = ConvertWorldToScreen(p, cv);
 
-    // local pivot
-    Vector2 origin = {0.5f * entity->width, 0.5f * entity->height};
+    float textureScale = cv.tileSize * cv.scale / (float)entity->texture.width;
 
-    DrawRectanglePro(rec, origin, RAD2DEG * radians, color);
+    // Have to negate rotation to account for y-flip
+    DrawTextureEx(entity->texture, ps, -RAD2DEG * radians, textureScale, WHITE);
+
+    // I used these circles to ensure the coordinate transformation was correct
+    // DrawCircleV(ps, 5.0f, BLACK);
+    // p = b2Body_GetWorldPoint(entity->bodyId, (b2Vec2){0.0f, 0.0f});
+    // ps = ConvertWorldToScreen(p, cv);
+    // DrawCircleV(ps, 5.0f, BLUE);
+    // p = b2Body_GetWorldPoint(entity->bodyId, (b2Vec2){0.5f * cv.tileSize, -0.5f * cv.tileSize});
+    // ps = ConvertWorldToScreen(p, cv);
+    // DrawCircleV(ps, 5.0f, RED);
 }
 
 int main(void)
 {
-    int width = 800, height = 450;
+    int width = 1920, height = 1080;
     InitWindow(width, height, "box2d-raylib");
 
     SetTargetFPS(60);
 
-    float scale = 10.0f;
-    float halfWidth = 0.5f * width;
-    float halfHeight = 0.5f * height;
+    float tileSize = 1.0f;
+    float scale = 60.0f;
 
-    Conversion cv = {scale, halfWidth, halfHeight};
+    Conversion cv = {scale, tileSize, (float)width, (float)height};
 
     b2WorldDef worldDef = b2_defaultWorldDef;
     b2WorldId worldId = b2CreateWorld(&worldDef);
 
-    Entity groundEntity = {0};
-    {
-        b2BodyDef bodyDef = b2_defaultBodyDef;
-        bodyDef.position = ConvertPositionToBox2D((Vector2){halfWidth, 400.0f}, cv);
-        groundEntity.bodyId = b2CreateBody(worldId, &bodyDef);
-        groundEntity.width = 600;
-        groundEntity.height = 20;
+    Texture textures[2] = {0};
+    textures[0] = LoadTexture("ground.png");
+    textures[1] = LoadTexture("box.png");
 
-        b2Polygon groundBox = RectangleToPolygon(groundEntity.width, groundEntity.height, scale);
-        b2CreatePolygonShape(groundEntity.bodyId, &b2_defaultShapeDef, &groundBox);
+    b2Polygon tilePolygon = b2MakeSquare(0.5f * tileSize);
+
+    Entity groundEntities[20] = {0};
+    for (int i = 0; i < 20; ++i)
+    {
+        Entity* entity = groundEntities + i;
+        b2BodyDef bodyDef = b2_defaultBodyDef;
+        bodyDef.position = (b2Vec2){(1.0f * i - 10.0f) * tileSize, -4.5f - 0.5f * tileSize};
+
+        // I used this rotation to test the world to screen transformation
+        //bodyDef.angle = 0.25f * b2_pi * i;
+
+        entity->bodyId = b2CreateBody(worldId, &bodyDef);
+        entity->texture = textures[0];
+        b2CreatePolygonShape(entity->bodyId, &b2_defaultShapeDef, &tilePolygon);
     }
 
-    Entity entity = {0};
-    b2BodyDef bodyDef = b2_defaultBodyDef;
-    bodyDef.type = b2_dynamicBody;
-    bodyDef.position = ConvertPositionToBox2D((Vector2){halfWidth, 100.0f}, cv);
-    entity.bodyId = b2CreateBody(worldId, &bodyDef);
-    entity.width = 25;
-    entity.height = 25;
+    Entity boxEntities[4] = {4};
+    for (int i = 0; i < 4; ++i)
+    {
+        Entity* entity = boxEntities + i;
+        b2BodyDef bodyDef = b2_defaultBodyDef;
+        bodyDef.type = b2_dynamicBody;
+        bodyDef.position = (b2Vec2){0.5f * tileSize * i, -4.0f + tileSize * i};
+        entity->bodyId = b2CreateBody(worldId, &bodyDef);
+        entity->texture = textures[1];
+        b2ShapeDef shapeDef = b2_defaultShapeDef;
+        shapeDef.restitution = 0.1f;
+        b2CreatePolygonShape(entity->bodyId, &shapeDef, &tilePolygon);
+    }
 
-    b2Polygon box = RectangleToPolygon(entity.width, entity.height, scale);
-    b2ShapeDef shapeDef = b2_defaultShapeDef;
-    shapeDef.restitution = 0.9f;
-    b2CreatePolygonShape(entity.bodyId, &shapeDef, &box);
+    bool pause = true;
 
     while (!WindowShouldClose())
     {
-        b2World_Step(worldId, 1.0f / 60.0f, 8, 3);
+        if (IsKeyPressed(KEY_P))
+        {
+            pause = !pause;
+        }
+        
+        if (pause == false)
+        {
+            float deltaTime = GetFrameTime();
+            b2World_Step(worldId, deltaTime, 8, 3);
+        }
 
         BeginDrawing();
         ClearBackground(DARKGRAY);
-        DrawText("Hello Box2D!", 350, 50, 20, LIGHTGRAY);
-        DrawEntity(&groundEntity, cv, GREEN);
-        DrawEntity(&entity, cv, PINK);
+        DrawText("Hello Box2D!", width / 2 - 40, 50, 36, LIGHTGRAY);
+
+        for (int i = 0; i < 20; ++i)
+        {
+            DrawEntity(groundEntities + i, cv);
+        }
+
+        for (int i = 0; i < 4; ++i)
+        {
+            DrawEntity(boxEntities + i, cv);
+        }
+
         EndDrawing();
     }
+
+    UnloadTexture(textures[0]);
+    UnloadTexture(textures[1]);
 
     CloseWindow();
 

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.3 (0e150ed6c4, 2023-07-21)"
+   sodipodi:docname="texture_source.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="true"
+     inkscape:zoom="13.918893"
+     inkscape:cx="384.51334"
+     inkscape:cy="534.34565"
+     inkscape:window-width="2402"
+     inkscape:window-height="1561"
+     inkscape:window-x="1097"
+     inkscape:window-y="56"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1">
+    <inkscape:grid
+       id="grid1"
+       units="px"
+       originx="0"
+       originy="0"
+       spacingx="0.26458333"
+       spacingy="0.26458334"
+       empcolor="#0099e5"
+       empopacity="0.30196078"
+       color="#0099e5"
+       opacity="0.14901961"
+       empspacing="5"
+       dotted="false"
+       gridanglex="30"
+       gridanglez="30"
+       visible="true" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       id="rect3724"
+       width="6.0854249"
+       height="6.085423"
+       x="92.868752"
+       y="131.23334"
+       style="fill:none;stroke:#30aebf;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       inkscape:export-xdpi="493.6962"
+       inkscape:export-ydpi="493.6962"
+       inkscape:export-filename="rect3724.png" />
+    <text
+       xml:space="preserve"
+       style="font-size:3.175px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';fill:#7e7e7e;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-linejoin:round;stroke-opacity:1"
+       x="94.032509"
+       y="135.43179"
+       id="text1"><tspan
+         sodipodi:role="line"
+         id="tspan1"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Hack Nerd Font';-inkscape-font-specification:'Hack Nerd Font, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#7e7e7e;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-opacity:1"
+         x="94.032509"
+         y="135.43179">v3</tspan></text>
+    <rect
+       id="rect1"
+       width="6.0854249"
+       height="6.085423"
+       x="102.12915"
+       y="131.23334"
+       style="fill:#e2f4c3;stroke:#8cc924;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;fill-opacity:1"
+       inkscape:export-xdpi="493.6962"
+       inkscape:export-ydpi="493.6962"
+       inkscape:export-filename="rect1.png" />
+  </g>
+</svg>
