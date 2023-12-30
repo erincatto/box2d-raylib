@@ -8,8 +8,6 @@ project(game
 	LANGUAGES C
 )
 
-
-
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 FetchContent_Declare(
@@ -31,5 +29,4 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(raylib)
 
 add_executable(game main.c)
-
 target_link_libraries(game PRIVATE box2d raylib)
