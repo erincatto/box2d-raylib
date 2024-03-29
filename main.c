@@ -55,7 +55,7 @@ int main(void)
 
     Conversion cv = {scale, tileSize, (float)width, (float)height};
 
-    b2WorldDef worldDef = b2_defaultWorldDef;
+    b2WorldDef worldDef = b2DefaultWorldDef();
     b2WorldId worldId = b2CreateWorld(&worldDef);
 
     Texture textures[2] = {0};
@@ -68,32 +68,33 @@ int main(void)
     for (int i = 0; i < 20; ++i)
     {
         Entity* entity = groundEntities + i;
-        b2BodyDef bodyDef = b2_defaultBodyDef;
+        b2BodyDef bodyDef = b2DefaultBodyDef();
         bodyDef.position = (b2Vec2){(1.0f * i - 10.0f) * tileSize, -4.5f - 0.5f * tileSize};
 
         // I used this rotation to test the world to screen transformation
-        //bodyDef.angle = 0.25f * b2_pi * i;
+        //bodyDef.angle = 0.25f * b2Di * i;
 
         entity->bodyId = b2CreateBody(worldId, &bodyDef);
         entity->texture = textures[0];
-        b2CreatePolygonShape(entity->bodyId, &b2_defaultShapeDef, &tilePolygon);
+        b2ShapeDef shapeDef = b2DefaultShapeDef();
+        b2CreatePolygonShape(entity->bodyId, &shapeDef, &tilePolygon);
     }
 
     Entity boxEntities[4] = {4};
     for (int i = 0; i < 4; ++i)
     {
         Entity* entity = boxEntities + i;
-        b2BodyDef bodyDef = b2_defaultBodyDef;
+        b2BodyDef bodyDef = b2DefaultBodyDef();
         bodyDef.type = b2_dynamicBody;
         bodyDef.position = (b2Vec2){0.5f * tileSize * i, -4.0f + tileSize * i};
         entity->bodyId = b2CreateBody(worldId, &bodyDef);
         entity->texture = textures[1];
-        b2ShapeDef shapeDef = b2_defaultShapeDef;
+        b2ShapeDef shapeDef = b2DefaultShapeDef();
         shapeDef.restitution = 0.1f;
         b2CreatePolygonShape(entity->bodyId, &shapeDef, &tilePolygon);
     }
 
-    bool pause = true;
+    bool pause = false;
 
     while (!WindowShouldClose())
     {
@@ -105,7 +106,7 @@ int main(void)
         if (pause == false)
         {
             float deltaTime = GetFrameTime();
-            b2World_Step(worldId, deltaTime, 8, 3);
+            b2World_Step(worldId, deltaTime, 4);
         }
 
         BeginDrawing();
