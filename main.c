@@ -59,8 +59,8 @@ int main(void)
     b2WorldId worldId = b2CreateWorld(&worldDef);
 
     Texture textures[2] = {0};
-    textures[0] = LoadTexture("../ground.png");
-    textures[1] = LoadTexture("../box.png");
+    textures[0] = LoadTexture("ground.png");
+    textures[1] = LoadTexture("box.png");
 
     b2Polygon tilePolygon = b2MakeSquare(0.5f * tileSize);
 
