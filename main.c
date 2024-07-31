@@ -1,101 +1,110 @@
 #include "raylib.h"
-#include "raymath.h"
 #include "box2d/box2d.h"
 
-typedef struct Conversion
-{
-	float scale;
-	float tileSize;
-	float screenWidth;
-	float screenHeight;
-} Conversion;
+#include <assert.h>
+
+// This shows how to use Box2D v3 with raylib.
+// It also show how to use Box2D with pixel units.
 
 typedef struct Entity
 {
 	b2BodyId bodyId;
+	b2Vec2 extent;
 	Texture texture;
 } Entity;
 
-Vector2 ConvertWorldToScreen(b2Vec2 p, Conversion cv)
+void DrawEntity(const Entity* entity)
 {
-	Vector2 result = { cv.scale * p.x + 0.5f * cv.screenWidth, 0.5f * cv.screenHeight - cv.scale * p.y };
-	return result;
+	b2Vec2 p = b2Body_GetWorldPoint(entity->bodyId, (b2Vec2) { -entity->extent.x, -entity->extent.y });
+	b2Rot rotation = b2Body_GetRotation(entity->bodyId);
+	float radians = b2Rot_GetAngle(rotation);
+
+	Vector2 ps = {p.x, p.y};
+
+	DrawTextureEx(entity->texture, ps, RAD2DEG * radians, 1.0f, WHITE);
+
+	// I used these circles to ensure the coordinates are correct
+	//DrawCircleV(ps, 5.0f, BLACK);
+	//p = b2Body_GetWorldPoint(entity->bodyId, (b2Vec2){0.0f, 0.0f});
+	//ps = (Vector2){ p.x, p.y };
+	//DrawCircleV(ps, 5.0f, BLUE);
+	//p = b2Body_GetWorldPoint(entity->bodyId, (b2Vec2){ entity->extent.x, entity->extent.y });
+	//ps = (Vector2){ p.x, p.y };
+	//DrawCircleV(ps, 5.0f, RED);
 }
 
-void DrawEntity(const Entity* entity, Conversion cv)
-{
-	b2Vec2 p = b2Body_GetWorldPoint(entity->bodyId, (b2Vec2) { -0.5f * cv.tileSize, 0.5f * cv.tileSize });
-	float radians = b2Body_GetAngle(entity->bodyId);
-
-	Vector2 ps = ConvertWorldToScreen(p, cv);
-
-	float textureScale = cv.tileSize * cv.scale / (float)entity->texture.width;
-
-	// Have to negate rotation to account for y-flip
-	DrawTextureEx(entity->texture, ps, -RAD2DEG * radians, textureScale, WHITE);
-
-	// I used these circles to ensure the coordinate transformation was correct
-	// DrawCircleV(ps, 5.0f, BLACK);
-	// p = b2Body_GetWorldPoint(entity->bodyId, (b2Vec2){0.0f, 0.0f});
-	// ps = ConvertWorldToScreen(p, cv);
-	// DrawCircleV(ps, 5.0f, BLUE);
-	// p = b2Body_GetWorldPoint(entity->bodyId, (b2Vec2){0.5f * cv.tileSize, -0.5f * cv.tileSize});
-	// ps = ConvertWorldToScreen(p, cv);
-	// DrawCircleV(ps, 5.0f, RED);
-}
+#define GROUND_COUNT 14
+#define BOX_COUNT 10
 
 int main(void)
 {
-	int width = 1280, height = 720;
+	int width = 1920, height = 1080;
 	InitWindow(width, height, "box2d-raylib");
 
 	SetTargetFPS(60);
 
-	float tileSize = 1.0f;
-	float scale = 50.0f;
-
-	Conversion cv = { scale, tileSize, (float)width, (float)height };
+	// 128 pixels per meter is a appropriate for this scene. The boxes are 128 pixels wide.
+	float lengthUnitsPerMeter = 128.0f;
+	b2SetLengthUnitsPerMeter(lengthUnitsPerMeter);
 
 	b2WorldDef worldDef = b2DefaultWorldDef();
+
+	// Realistic gravity is achieved by multiplying gravity by the length unit.
+	worldDef.gravity.y = 9.8f * lengthUnitsPerMeter;
 	b2WorldId worldId = b2CreateWorld(&worldDef);
 
-	Texture textures[2] = { 0 };
-	textures[0] = LoadTexture("ground.png");
-	textures[1] = LoadTexture("box.png");
+	Texture groundTexture = LoadTexture("ground.png");
+	Texture boxTexture = LoadTexture("box.png");
 
-	b2Polygon tilePolygon = b2MakeSquare(0.5f * tileSize);
+	b2Vec2 groundExtent = { 0.5f * groundTexture.width, 0.5f * groundTexture.height };
+	b2Vec2 boxExtent = { 0.5f * boxTexture.width, 0.5f * boxTexture.height };
 
-	Entity groundEntities[20] = { 0 };
-	for (int i = 0; i < 20; ++i)
+	b2Polygon groundPolygon = b2MakeBox(groundExtent.x, groundExtent.y);
+	b2Polygon boxPolygon = b2MakeBox(boxExtent.x, boxExtent.y);
+
+	Entity groundEntities[GROUND_COUNT] = { 0 };
+	for (int i = 0; i < GROUND_COUNT; ++i)
 	{
 		Entity* entity = groundEntities + i;
 		b2BodyDef bodyDef = b2DefaultBodyDef();
-		bodyDef.position = (b2Vec2){ (1.0f * i - 10.0f) * tileSize, -4.5f - 0.5f * tileSize };
+		bodyDef.position = (b2Vec2){ (2.0f * i + 2.0f) * groundExtent.x, height - groundExtent.y - 100.0f};
 
 		// I used this rotation to test the world to screen transformation
-		//bodyDef.angle = 0.25f * b2_pi * i;
+		//bodyDef.rotation = b2MakeRot(0.25f * b2_pi * i);
 
 		entity->bodyId = b2CreateBody(worldId, &bodyDef);
-		entity->texture = textures[0];
+		entity->extent = groundExtent;
+		entity->texture = groundTexture;
 		b2ShapeDef shapeDef = b2DefaultShapeDef();
-		b2CreatePolygonShape(entity->bodyId, &shapeDef, &tilePolygon);
+		b2CreatePolygonShape(entity->bodyId, &shapeDef, &groundPolygon);
 	}
 
-	Entity boxEntities[4] = { 4 };
+	Entity boxEntities[BOX_COUNT] = { 0 };
+	int boxIndex = 0;
 	for (int i = 0; i < 4; ++i)
 	{
-		Entity* entity = boxEntities + i;
-		b2BodyDef bodyDef = b2DefaultBodyDef();
-		bodyDef.type = b2_dynamicBody;
-		bodyDef.position = (b2Vec2){ 0.5f * tileSize * i, -4.0f + tileSize * i };
-		entity->bodyId = b2CreateBody(worldId, &bodyDef);
-		entity->texture = textures[1];
-		b2ShapeDef shapeDef = b2DefaultShapeDef();
-		shapeDef.restitution = 0.1f;
-		b2CreatePolygonShape(entity->bodyId, &shapeDef, &tilePolygon);
+		float y = height - groundExtent.y - 100.0f - (2.5f * i + 2.0f) * boxExtent.y - 20.0f;
+
+		for (int j = i; j < 4; ++j)
+		{
+			float x = 0.5f * width + (3.0f * j - i - 3.0f) * boxExtent.x;
+			assert(boxIndex < BOX_COUNT);
+
+			Entity* entity = boxEntities + boxIndex;
+			b2BodyDef bodyDef = b2DefaultBodyDef();
+			bodyDef.type = b2_dynamicBody;
+			bodyDef.position = (b2Vec2){ x, y };
+			entity->bodyId = b2CreateBody(worldId, &bodyDef);
+			entity->texture = boxTexture;
+			entity->extent = boxExtent;
+			b2ShapeDef shapeDef = b2DefaultShapeDef();
+			b2CreatePolygonShape(entity->bodyId, &shapeDef, &boxPolygon);
+
+			boxIndex += 1;
+		}
 	}
 
-	bool pause = false;
+	bool pause = true;
 
 	while (!WindowShouldClose())
 	{
@@ -118,21 +127,21 @@ int main(void)
 		int textWidth = MeasureText("Hello Box2D!", fontSize);
 		DrawText(message, (width - textWidth) / 2, 50, fontSize, LIGHTGRAY);
 
-		for (int i = 0; i < 20; ++i)
+		for (int i = 0; i < GROUND_COUNT; ++i)
 		{
-			DrawEntity(groundEntities + i, cv);
+			DrawEntity(groundEntities + i);
 		}
 
-		for (int i = 0; i < 4; ++i)
+		for (int i = 0; i < BOX_COUNT; ++i)
 		{
-			DrawEntity(boxEntities + i, cv);
+			DrawEntity(boxEntities + i);
 		}
 
 		EndDrawing();
 	}
 
-	UnloadTexture(textures[0]);
-	UnloadTexture(textures[1]);
+	UnloadTexture(groundTexture);
+	UnloadTexture(boxTexture);
 
 	CloseWindow();
 
