@@ -15,12 +15,13 @@ typedef struct Entity
 
 void DrawEntity(const Entity* entity)
 {
+	// The boxes were created centered on the bodies, but raylib draws textures starting at the top left corner.
+	// b2Body_GetWorldPoint gets the top left corner of the box accounting for rotation.
 	b2Vec2 p = b2Body_GetWorldPoint(entity->bodyId, (b2Vec2) { -entity->extent.x, -entity->extent.y });
 	b2Rot rotation = b2Body_GetRotation(entity->bodyId);
 	float radians = b2Rot_GetAngle(rotation);
 
 	Vector2 ps = {p.x, p.y};
-
 	DrawTextureEx(entity->texture, ps, RAD2DEG * radians, 1.0f, WHITE);
 
 	// I used these circles to ensure the coordinates are correct
@@ -59,6 +60,8 @@ int main(void)
 	b2Vec2 groundExtent = { 0.5f * groundTexture.width, 0.5f * groundTexture.height };
 	b2Vec2 boxExtent = { 0.5f * boxTexture.width, 0.5f * boxTexture.height };
 
+	// These polygons are centered on the origin and when they are added to a body they
+	// will be centered on the body position.
 	b2Polygon groundPolygon = b2MakeBox(groundExtent.x, groundExtent.y);
 	b2Polygon boxPolygon = b2MakeBox(boxExtent.x, boxExtent.y);
 
@@ -104,7 +107,7 @@ int main(void)
 		}
 	}
 
-	bool pause = true;
+	bool pause = false;
 
 	while (!WindowShouldClose())
 	{
