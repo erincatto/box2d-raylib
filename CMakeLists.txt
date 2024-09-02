@@ -13,7 +13,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 FetchContent_Declare(
 	box2d
 	GIT_REPOSITORY https://github.com/erincatto/box2d.git
-	GIT_TAG main
+	GIT_TAG 7b273b12409252d247b89940d29a8aab0386f570
 	GIT_SHALLOW TRUE
 	GIT_PROGRESS TRUE
 )
