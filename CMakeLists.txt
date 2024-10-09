@@ -13,7 +13,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 FetchContent_Declare(
 	box2d
 	GIT_REPOSITORY https://github.com/erincatto/box2d.git
-	GIT_TAG 7b273b12409252d247b89940d29a8aab0386f570
+	GIT_TAG main
 	GIT_SHALLOW TRUE
 	GIT_PROGRESS TRUE
 )
@@ -41,5 +41,5 @@ if (EMSCRIPTEN)
 	# Since WASM is used, ALLOW_MEMORY_GROWTH has no extra overheads
 	#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sWASM=1 -sASYNCIFY -sALLOW_MEMORY_GROWTH=1 --shell-file ${CMAKE_SOURCE_DIR}/minshell.html")
 	set(CMAKE_EXECUTABLE_SUFFIX ".html")
-	target_link_options(game PROPERTIES LINK_FLAGS "--preload-file images@images -sWASM=1 -sASYNCIFY -sALLOW_MEMORY_GROWTH=1 --shell-file ${CMAKE_SOURCE_DIR}/minshell.html"")
+	target_link_options(game PROPERTIES LINK_FLAGS "--preload-file images@images -sWASM=1 -sASYNCIFY -sALLOW_MEMORY_GROWTH=1 --shell-file ${CMAKE_SOURCE_DIR}/minshell.html")
 endif()
