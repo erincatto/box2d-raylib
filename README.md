@@ -18,3 +18,10 @@ Feel free to use this project as a starting point for making a game using raylib
 
 ![screenshot](screenshot.png)
 
+
+## Emscripten (work in progress)
+source ../emsdk/emsdk_env.sh
+mkdir build
+emcmake cmake -S . -B build -DPLATFORM=Web
+cd build
+mingw32-make.exe PLATFORM=PLATFORM_WEB -B
